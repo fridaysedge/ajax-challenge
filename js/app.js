@@ -12,7 +12,7 @@ angular.module('commentsApp', ['ui.bootstrap'])
         $httpProvider.defaults.headers.common['X-Parse-REST-API-Key'] = 
 			'uBc1csfR4m8nRVK9d2qN7aQujm7EdZ1Xe3Hckmkq';
     })
-    .controller('TasksController', function($scope, $http) {
+    .controller('CommentsController', function($scope, $http) {
         var commentsUrl = 'https://api.parse.com/1/classes/comments';
 
         $scope.refreshComments = function(){
@@ -28,19 +28,21 @@ angular.module('commentsApp', ['ui.bootstrap'])
                     $scope.loading = false;
                 });
         };
-        $scope.refreshComments();
+        //$scope.refreshComments();
 
-        //$scope.newComment = {score: 0};
+        $scope.newComment = {score: 0};
 
         $scope.addComment = function(){
             $http.post(commentsUrl, $scope.newComment)
                 .success(function(responseData){
+					
                     $scope.newComment.objectId = responseData.objectId;
                     $scope.comments.push($scope.newComment);
                     $scope.newComment = {score: 0}; // defualt value for new comments
                 })
                 .error(function(err){
                     $scope.errorMessage = err;
+					console.log(err);
                 });
         };
 
