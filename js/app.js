@@ -32,24 +32,31 @@ angular.module('commentsApp', ['ui.bootstrap'])
         $scope.refreshComments();
 
         $scope.newComment = {score: 0};
-        $scope.loading = false;
 
         $scope.addComment = function(){
-            $scope.loading = true; // advertise that the application is processing
-            $http.post(commentsUrl, $scope.newComment)
-                .success(function(responseData){
-                    $scope.newComment.objectId = responseData.objectId;
-                    $scope.comments.push($scope.newComment);
-                    $scope.newComment = {score: 0};
-                })
-                .error(function(err){
-                    $scope.errorMessage = err;
-					console.log(err);
-                })
-                .finally(function(){
-                    $scope.loading = false; // Turn of the advertisement
-                    $scope.refreshComments();
-                });
+            // Is there content in the required fields?
+            if($scope.newComment.rating &&
+                $scope.newComment.name &&
+                $scope.newComment.title &&
+                $scope.newComment.body){
+
+                // If true, it's not a double click, post the comment, otherwise ignore
+                $scope.loading = true; // advertise that the application is processing
+                $http.post(commentsUrl, $scope.newComment)
+                    .success(function(responseData){
+                        $scope.newComment.objectId = responseData.objectId;
+                        $scope.comments.push($scope.newComment);
+                        $scope.newComment = {score: 0};
+                    })
+                    .error(function(err){
+                        $scope.errorMessage = err;
+                        console.log(err);
+                    })
+                    .finally(function(){
+                        $scope.loading = false; // Turn of the advertisement
+                        $scope.refreshComments();
+                    });
+            };
         }; // addComment
 
         $scope.deleteComment = function(comment){
@@ -72,7 +79,6 @@ angular.module('commentsApp', ['ui.bootstrap'])
                 $http.put(commentsUrl + '/' + comment.objectId,
                     {score: {__op: 'Increment', amount: amount}})
                     .success(function(responseData){
-                        console.log(responseData);
                         comment.score = responseData.score;
                     })
                     .error(function(err){
