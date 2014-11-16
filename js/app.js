@@ -14,7 +14,6 @@ angular.module('commentsApp', ['ui.bootstrap'])
     })
     .controller('CommentsController', function($scope, $http) {
         var commentsUrl = 'https://api.parse.com/1/classes/comments';
-
         $scope.refreshComments = function(){
             $scope.loading = true; // advertise that the application is processing
             $http.get(commentsUrl + '?order=-score')
@@ -32,8 +31,8 @@ angular.module('commentsApp', ['ui.bootstrap'])
         // Refresh the comments
         $scope.refreshComments();
 
-        // Prep the new comment
-        $scope.newComment = {score: 0}; // default value for new comments
+        $scope.newComment = {score: 0};
+        $scope.loading = false;
 
         $scope.addComment = function(){
             $scope.loading = true; // advertise that the application is processing
@@ -41,7 +40,7 @@ angular.module('commentsApp', ['ui.bootstrap'])
                 .success(function(responseData){
                     $scope.newComment.objectId = responseData.objectId;
                     $scope.comments.push($scope.newComment);
-                    //$scope.newComment = {score: 0}; // default value for new comments
+                    $scope.newComment = {score: 0};
                 })
                 .error(function(err){
                     $scope.errorMessage = err;
@@ -49,6 +48,7 @@ angular.module('commentsApp', ['ui.bootstrap'])
                 })
                 .finally(function(){
                     $scope.loading = false; // Turn of the advertisement
+                    $scope.refreshComments();
                 });
         }; // addComment
 
