@@ -11,3 +11,30 @@ body {
     margin-right: 10px;
 }
 
+.comments {
+    width: 75%;
+    margin: 20px 40px;
+    border: 2px solid #a1a1a1;
+    padding: 10px 40px;
+    background: #dddddd;
+    border-radius: 25px;
+}
+
+.required:after {
+    content: ' *';
+    color: #FF0000;
+}
+
+#comment-text {
+    resize:vertical;
+    overflow:auto;
+}
+
+.form-control {
+    width: 80%;
+}
+
+.comment-display-title {
+    font-weight: 900;
+    font-size: 110%;
+}

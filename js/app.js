@@ -6,7 +6,7 @@
 
 angular.module('commentsApp', ['ui.bootstrap'])
     .config(function($httpProvider) {
-        //Parse required headerstwo extra headers sent with every HTTP request: X-Parse-Application-Id, X-Parse-REST-API-Key
+        //Parse required headers
         $httpProvider.defaults.headers.common['X-Parse-Application-Id'] = 
 			'pEuDF4iyxeJxiRQkOIklnLG39EJsw6uJN9eOObeO';
         $httpProvider.defaults.headers.common['X-Parse-REST-API-Key'] = 
@@ -16,8 +16,8 @@ angular.module('commentsApp', ['ui.bootstrap'])
         var commentsUrl = 'https://api.parse.com/1/classes/comments';
 
         $scope.refreshComments = function(){
-            $scope.loading = true;
-            $http.get(commentsUrl)
+            $scope.loading = true; // advertise that the application is processing
+            $http.get(commentsUrl + '?order=-score')
                 .success(function(data){
                     $scope.comments = data.results;
                 })
@@ -25,50 +25,62 @@ angular.module('commentsApp', ['ui.bootstrap'])
                     $scope.errorMessage = err;
                 })
                 .finally(function(){
-                    $scope.loading = false;
+                    $scope.loading = false; // Turn of the advertisement
                 });
-        };
-        //$scope.refreshComments();
+        }; // refreshComments
 
-        $scope.newComment = {score: 0};
+        // Refresh the comments
+        $scope.refreshComments();
+
+        // Prep the new comment
+        $scope.newComment = {score: 0}; // default value for new comments
 
         $scope.addComment = function(){
+            $scope.loading = true; // advertise that the application is processing
             $http.post(commentsUrl, $scope.newComment)
                 .success(function(responseData){
-					
                     $scope.newComment.objectId = responseData.objectId;
                     $scope.comments.push($scope.newComment);
-                    $scope.newComment = {score: 0}; // defualt value for new comments
+                    //$scope.newComment = {score: 0}; // default value for new comments
                 })
                 .error(function(err){
                     $scope.errorMessage = err;
 					console.log(err);
-                });
-        };
-
-        $scope.updateComment = function(comment){
-            $http.put(commentsUrl + '/' + comment.objectId, comment)
-                .success(function(){
-
-                })
-                .error(function(err){
-                    $scope.errorMessage = err;
-                });
-        };
-
-        $scope.incrementRating = function(comment, amount){
-            $scope.updating = true;
-			$http.put(commentsUrl + '/' + comment.objectId,
-				{rating: {__op: 'Increment', amount: amount}})
-                .success(function(responseData){
-                    console.log(responseData);
-                    comment.ratings = responseData.ratings;
-                })
-                .error(function(err){
-                    console.log(err);
                 })
                 .finally(function(){
-                    $scope.updatng = false;
+                    $scope.loading = false; // Turn of the advertisement
                 });
-        };
+        }; // addComment
+
+        $scope.deleteComment = function(comment){
+            // Warn the user of the impending deletion
+            if(confirm("Are you sure you want to delete this comment?")){
+                $http.delete(commentsUrl + '/' + comment.objectId, comment)
+                    .success(function(){
+                        $scope.refreshComments();
+                    })
+                    .error(function(err){
+                        $scope.errorMessage = err;
+                    });
+            }
+        }; // deleteComment
+
+        $scope.incrementScore = function(comment, amount){
+            $scope.loading = true; // advertise that the application is processing
+            // Is the the passed amount going to bring the score below zero
+            if(comment.score + amount >= 0){
+                $http.put(commentsUrl + '/' + comment.objectId,
+                    {score: {__op: 'Increment', amount: amount}})
+                    .success(function(responseData){
+                        console.log(responseData);
+                        comment.score = responseData.score;
+                    })
+                    .error(function(err){
+                        console.log(err);
+                    })
+                    .finally(function(){
+                        $scope.loading = false; // Turn of the advertisement
+                    });
+            }
+        }; // incrementScore
     });
